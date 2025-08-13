@@ -1,12 +1,11 @@
-# NOTION_DB_IDS="32ee4d67321745fa8af54885b1bc28d6,f3877a9dfce74e0792454cc6a20be80e"
-# NOTION_DUE_PROP="Date"   # default; we override per-DB below
+# This is your working config - restore these values after cloning
 # Map each database to: date property, extra fields to show, and optional friendly name
 databases:
-  "32ee4d67321745fa8af54885b1bc28d6":   # Applications
+  "32ee4d67321745fa8af54885b1bc28d6":   # Applications (corrected database ID)
     name: Applications
     date_property: Deadline
-    fields: [Type, Company]               # you asked for these
-  "f3877a9dfce74e0792454cc6a20be80e":   # Coursework/Homework
+    fields: [Type, Company]
+  "f3877a9dfce74e0792454cc6a20be80e":   # Assignments
     name: Assignments
     date_property: Date
     fields: [Class, Type]

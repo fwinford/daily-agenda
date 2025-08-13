@@ -207,7 +207,7 @@ def build_html(tz, events: List[Dict], due_today: List[Dict], due_tomorrow: List
             # Format the time range
             start_time = _fmt_time(event["start"])
             end_time = _fmt_time(event["end"])
-            time_range = f"{start_time}–{end_time}"
+            time_range = f"{start_time}-{end_time}"
             
             # Build the event details with calendar pill
             pill_html = f'<span style="background:#f3f4f6; color:#6b7280; padding:2px 8px; border-radius:12px; font-size:12px; margin-left:8px;">{calendar}</span>'
@@ -255,7 +255,7 @@ def build_html(tz, events: List[Dict], due_today: List[Dict], due_tomorrow: List
       <div style="max-width:720px; margin:0 auto; background:#ffffff; border-radius:8px; padding:24px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
         
         <h2 style="margin:0 0 24px 0; font-size:20px; font-weight:600; color:#111827; line-height:1.3;">
-          Today's agenda — {day_label}
+          Today's agenda - {day_label}
         </h2>
 
         <div style="margin-bottom:32px;">

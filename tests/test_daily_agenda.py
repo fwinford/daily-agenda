@@ -10,7 +10,7 @@ class TestAgendaSimple(unittest.TestCase):
 
     def test_overlap_detection_in_html(self):
         """Test that overlapping events are detected and marked in HTML"""
-        # Two overlapping events: 9:00–10:00 and 9:30–10:30
+        # Two overlapping events: 9:00-10:00 and 9:30-10:30
         e1_start = self.tz.localize(datetime(2025, 8, 13, 9, 0))
         e1_end   = self.tz.localize(datetime(2025, 8, 13, 10, 0))
         e2_start = self.tz.localize(datetime(2025, 8, 13, 9, 30))
