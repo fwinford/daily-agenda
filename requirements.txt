@@ -2,3 +2,7 @@ requests
 icalendar
 pytz
 PyYAML
+python-dotenv
+# Testing dependencies  
+pytest
+pytest-cov

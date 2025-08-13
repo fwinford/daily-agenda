@@ -1,0 +1,32 @@
+# Daily Agenda Database Configuration
+# Copy this file and update with your actual database IDs
+
+databases:
+  "YOUR_FIRST_DATABASE_ID":              # Replace with actual Notion database ID
+    name: "Tasks"                        # Optional: friendly name (auto-detected if not provided)
+    date_property: "Due Date"            # Required: name of your date column in Notion
+    fields: ["Priority", "Status"]       # Optional: additional fields to show
+    
+  "YOUR_SECOND_DATABASE_ID":             # Replace with actual Notion database ID  
+    name: "Projects"                     # Optional: friendly name
+    date_property: "Deadline"            # Required: name of your date column in Notion
+    fields: ["Category", "Owner"]        # Optional: additional fields to show
+
+# Example configurations for different database types:
+#
+# Simple task database:
+#   "your-task-db-id":
+#     date_property: "Due"
+#     fields: ["Priority", "Status", "Tags"]
+#
+# Class assignments:
+#   "your-assignments-db-id":
+#     name: "School"
+#     date_property: "Due Date"
+#     fields: ["Class", "Type", "Points"]
+#
+# Job applications:
+#   "your-jobs-db-id":
+#     name: "Applications" 
+#     date_property: "Deadline"
+#     fields: ["Company", "Position", "Status"]
