@@ -155,21 +155,71 @@ databases:
 
 ### 6. Get Calendar ICS URLs
 
-#### iCloud Calendar:
-1. Open calendar app on mac/iOS
-2. Right-click your calendar → **"share calendar"**
-3. Make it **"public"**
+The system supports multiple calendar types and can combine events from all of them:
+
+#### Apple/iCloud Calendars:
+1. Open Calendar app on Mac/iOS
+2. Right-click your calendar → **"Share Calendar"**
+3. Make it **"Public"**
 4. Copy the webcal URL and change `webcal://` to `https://`
+5. **Multiple calendars**: You can add as many iCloud calendars as you want
 
-#### Google Calendar:
-1. Open google calendar settings
-2. Click on your calendar → **"integrate calendar"**
-3. Copy the **"public URL to this calendar"**
+Example iCloud URLs:
+```
+https://p108-caldav.icloud.com/published/2/MTY1ODU3MDgxNzQxNjU4Ne...
+```
 
-#### Other Calendars:
-most calendar apps provide ICS/webcal URLs in their sharing settings.
+#### Google Calendars:
+1. Open Google Calendar settings
+2. Click on your calendar → **"Integrate Calendar"**
+3. Copy the **"Secret address in iCal format"** (not the embed URL)
+4. **Multiple Google calendars**: Each calendar has its own ICS URL
 
-### 7. Test Your Setup
+To convert a Google Calendar embed URL to ICS format:
+- **From**: `https://calendar.google.com/calendar/embed?src=nyu.edu_85g8...&ctz=America%2FNew_York`
+- **To**: `https://calendar.google.com/calendar/ical/nyu.edu_85g8.../public/basic.ics`
+
+#### Adding Multiple Calendars:
+In your `.env` file, separate multiple URLs with commas:
+```bash
+ICS_URLS="https://your-icloud-calendar1.ics,https://your-icloud-calendar2.ics,https://calendar.google.com/calendar/ical/your-google-cal/public/basic.ics"
+```
+
+#### Other Calendar Sources:
+- **Outlook/Exchange**: Most provide ICS/webcal URLs in sharing settings
+- **University calendars**: Often provide public ICS feeds
+- **Any ICS feed**: The system works with any valid ICS URL
+
+### 7. Timezone Configuration
+
+**Important**: Set your local timezone in `.env` for accurate event times:
+
+```bash
+TIMEZONE="America/New_York"
+```
+
+**Common timezones:**
+- `America/New_York` (Eastern Time)
+- `America/Chicago` (Central Time) 
+- `America/Denver` (Mountain Time)
+- `America/Los_Angeles` (Pacific Time)
+- `Europe/London` (GMT/BST)
+- `Europe/Paris` (CET/CEST)
+- `Asia/Tokyo` (JST)
+- `Australia/Sydney` (AEST/AEDT)
+
+**How timezone handling works:**
+- All calendar events are converted to your local timezone
+- All-day events are properly detected and displayed
+- Notion due dates are interpreted in your local timezone
+- Email timestamps use your timezone
+
+**Finding your timezone:**
+1. **Linux/Mac**: Run `timedatectl` or check `/etc/timezone`
+2. **Python**: `python -c "import time; print(time.tzname)"`
+3. **Online**: Search for "timezone database" + your city
+
+### 8. Test Your Setup
 
 ```bash
 # Test individual components
