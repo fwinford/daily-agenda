@@ -6,10 +6,10 @@ This app combines your calendar events and Notion tasks into one beautiful daily
 
 ## What You'll Get
 
-Every morning, you'll receive an email with:
-✮ **Today's calendar events** (from iCloud, Google Calendar, etc.)
+Every morning, you'll receive an email with:  
+✮ **Today's calendar events** (from iCloud, Google Calendar, etc.)  
 ✮ **Tasks due today & tomorrow** (from your Notion databases)  
-✮ **Professional HTML formatting**
+✮ **Professional HTML formatting**  
 
 ## Project Structure
 
