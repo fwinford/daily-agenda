@@ -38,12 +38,12 @@ daily-agenda/
 
 ## Features
 
-✮ **Automatic daily emails** with your personalized agenda
-✮ **Multiple calendar support** (iCloud, Google, Outlook, etc.)
-✮ **Notion database integration** with custom fields
-✮ **Preview mode** to test without sending emails
-✮ **Secure authentication** with app passwords
-✮ **Built-in testing** to verify everything works
+✮ **Automatic daily emails** with your personalized agenda  
+✮ **Multiple calendar support** (iCloud, Google, Outlook, etc.)  
+✮ **Notion database integration** with custom fields  
+✮ **Preview mode** to test without sending emails  
+✮ **Secure authentication** with app passwords  
+✮ **Built-in testing** to verify everything works  
 
 ## Quick Start
 
