@@ -56,7 +56,7 @@ daily-agenda/
 ### 1. Clone and Install Dependencies
 
 ```bash
-git clone <https://github.com/fwinford/daily-agenda>
+git clone https://github.com/fwinford/daily-agenda
 cd daily-agenda
 python3 -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
