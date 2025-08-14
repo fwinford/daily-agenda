@@ -314,26 +314,7 @@ TIMEZONE="America/New_York"  # or "Europe/London", "Asia/Tokyo", etc.
 - **✕ no events**: verify your ICS URLs are public and accessible
 - **✕ wrong timezone**: check the `TIMEZONE` setting in `.env`
 
-## 📈 Example Output
-
-your daily agenda email will look like:
-
-```
-Today's Agenda - Wednesday, Aug 13
-
-Calendar Events:
-• 9:00 AM - 10:00 AM: Team Meeting (Conference Room A)
-• 12:00 PM - 1:30 PM: Lunch with Client (Restaurant XYZ)
-
-Due Today:
-• Submit Application (Tech Corp - Full-time)
-
-Due Tomorrow:  
-• CS 101 Homework (Computer Science - Assignment)
-• Project Proposal (Business Strategy - Essay)
-```
-
-## 🤝 Contributing
+## Contributing
 
 1. fork the repository
 2. create a feature branch
