@@ -1,4 +1,6 @@
 requests
+requests.adapters
+urllib3.util.retry
 icalendar
 pytz
 PyYAML

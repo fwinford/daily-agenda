@@ -13,10 +13,54 @@ Key features:
 - Handles pagination for large databases
 - Graceful error handling for API failures
 """
-
+import os
+import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 from datetime import datetime, timedelta
 from typing import Dict, List
-import requests
+
+NOTION_VERSION = "2022-06-28"
+DEFAULT_TIMEOUT = float(os.getenv("NOTION_TIMEOUT", "20")) # Consistent timeout for all requests
+_USER_AGENT = os.getenv("NOTION_USER_AGENT", "daily-agenda/1.0")
+
+_SESSION = None  # module-level, reused across calls
+
+# Shared session with retries and connection pooling
+def _get_session() -> requests.Session:
+    """Return a process-wide shared Session with connection pooling + retries."""
+    global _SESSION
+    if _SESSION is not None:
+        return _SESSION
+
+    s = requests.Session()
+    s.headers.update({"User-Agent": _USER_AGENT})
+
+    # Retry on transient server errors & rate limits; respect Retry-After.
+    retry = Retry(
+        total=3,
+        backoff_factor=0.3,
+        status_forcelist=(429, 500, 502, 503, 504),
+        allowed_methods=frozenset(["GET", "POST"]),
+        raise_on_status=False,  # let us inspect status codes if needed
+    )
+    adapter = HTTPAdapter(max_retries=retry, pool_connections=50, pool_maxsize=50)
+    s.mount("https://", adapter)
+    s.mount("http://", adapter)
+
+    _SESSION = s
+    return _SESSION
+
+# Centralized headers builder so we don’t rebuild dicts all over.
+def _headers(token: str) -> dict:
+    """Minimal headers for Notion; token varies run-to-run."""
+    return {
+        "Authorization": f"Bearer {token}",
+        "Notion-Version": NOTION_VERSION,
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+
 
 def _prop_to_text(prop, token=None) -> str:
     """
@@ -78,13 +122,10 @@ def _prop_to_text(prop, token=None) -> str:
                 if page_id:
                     try:
                         # Fetch the related page to get its title
-                        resp = requests.get(
+                        resp = _get_session().get(
                             f"https://api.notion.com/v1/pages/{page_id}",
-                            headers={
-                                "Authorization": f"Bearer {token}",
-                                "Notion-Version": "2022-06-28"
-                            },
-                            timeout=10
+                            headers=_headers(token),
+                            timeout=10,
                         )
                         if resp.status_code == 200:
                             page_data = resp.json()
@@ -130,10 +171,10 @@ def get_db_title(token: str, db_id: str) -> str:
         str: Database title or "Notion DB" if fetch fails
     """
     try:
-        r = requests.get(
+        r = _get_session().get(
             f"https://api.notion.com/v1/databases/{db_id}",
-            headers={"Authorization": f"Bearer {token}", "Notion-Version": "2022-06-28"},
-            timeout=20
+            headers=_headers(token),
+            timeout=DEFAULT_TIMEOUT
         )
         r.raise_for_status()
         data = r.json()
@@ -187,8 +228,10 @@ def query_due_on(token: str, db_map: Dict[str, Dict], date_obj) -> List[Dict]:
 
         # Get database schema to determine property type
         try:
-            db_resp = requests.get(f"https://api.notion.com/v1/databases/{db_id}", 
-                                 headers=headers, timeout=30)
+            db_resp = _get_session().get(
+                f"https://api.notion.com/v1/databases/{db_id}",
+                headers=_headers(token), timeout=DEFAULT_TIMEOUT,
+                )
             db_resp.raise_for_status()
             db_info = db_resp.json()
             properties = db_info.get("properties", {})
@@ -241,8 +284,8 @@ def query_due_on(token: str, db_map: Dict[str, Dict], date_obj) -> List[Dict]:
                 payload["start_cursor"] = start_cursor
                 
             # Make the API request
-            resp = requests.post(f"https://api.notion.com/v1/databases/{db_id}/query",
-                                 headers=headers, json=payload, timeout=30)
+            resp = _get_session().post(f"https://api.notion.com/v1/databases/{db_id}/query",
+                                 headers=_headers(token), json=payload, timeout=DEFAULT_TIMEOUT)
             resp.raise_for_status()
             data = resp.json()
 
