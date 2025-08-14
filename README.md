@@ -17,8 +17,6 @@ The application:
 
 ## Features
 
-## what it does
-
 - ✓ **Multiple calendar support** via ICS URLs
 - ✓ **Notion integration** with custom database fields
 - ✓ **Relation field support** (shows linked class names, etc.)
