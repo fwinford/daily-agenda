@@ -1,9 +1,15 @@
 # Daily Agenda Email System
 
-A Python application that automatically generates and emails a personalized daily agenda by combining:
-- Calendar events from ICS feeds (like iCloud, Google Calendar)  
-- Tasks and assignments from Notion databases
-- Beautiful HTML email formatting
+**Get your daily schedule delivered to your inbox automatically!**
+
+This app combines your calendar events and Notion tasks into one beautiful daily agenda email.
+
+## What You'll Get
+
+Every morning, you'll receive an email with:
+✮ **Today's calendar events** (from iCloud, Google Calendar, etc.)
+✮ **Tasks due today & tomorrow** (from your Notion databases)  
+✮ **Professional HTML formatting**
 
 ## Project Structure
 
@@ -17,63 +23,64 @@ daily-agenda/
 │   └── render.py           # HTML email rendering
 ├── config/                 # Configuration files
 │   ├── .env               # Environment variables (create from .env.example)
+│   ├── .env.example       # Template file
 │   ├── config.yaml        # Database configuration
 │   └── config.yaml.example # Template
 ├── scripts/                # Utility & debug scripts
 │   ├── debug.py           # Preview & date override tools
-│   ├── test_calendar.py   # Calendar URL testing utility
+│   ├── test_calendar.py   # Calendar URL testing
 │   └── test_simple.py     # Basic setup verification
 ├── tests/                  # Unit tests
-│   ├── test_calendars.py
-│   ├── test_daily_agenda.py
-│   ├── test_email.py
-│   ├── test_main.py
-│   └── test_notion.py
 ├── main.py                 # Main application entry point
 ├── run_tests.py           # Test runner
 └── requirements.txt       # Python dependencies
 ```
 
-## Quick Commands
-
-```bash
-# Normal operation
-python main.py
-
-# Development & testing
-python run_tests.py                    # Run all unit tests
-python scripts/debug.py --preview-only # Preview without sending email
-python scripts/debug.py --date 2025-08-14 --preview-only # Test specific date
-python scripts/test_simple.py          # Basic setup check
-python scripts/test_calendar.py        # Test calendar URLs
-```
-
 ## Features
 
-+ **Multiple calendar support** via ICS URLs
-+ **Notion integration** with custom database fields  
-+ **Relation field support** (shows linked class names, etc.)
-+ **Overlap detection** for conflicting calendar events
-+ **Customizable fields** per database (Company, Class, Type, etc.)
-+ **SSL/TLS email support** (Gmail, Outlook, etc.)
-+ **Comprehensive testing** with unit tests
-+ **Debug & preview tools** for development
+✮ **Automatic daily emails** with your personalized agenda
+✮ **Multiple calendar support** (iCloud, Google, Outlook, etc.)
+✮ **Notion database integration** with custom fields
+✮ **Preview mode** to test without sending emails
+✮ **Secure authentication** with app passwords
+✮ **Built-in testing** to verify everything works
+
+## Quick Start
+
+```bash
+# 1. Get the code
+git clone https://github.com/fwinford/daily-agenda
+cd daily-agenda
+
+# 2. Set up Python
+python3 -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+
+# 3. Copy and edit your settings
+cp config/.env.example config/.env
+# Edit config/.env with your details (see setup guide below)
+
+# 4. Test it works
+python scripts/test_simple.py
+
+# 5. Send yourself a test email
+python main.py
+```
 
 ## Setup Instructions
 
-### 1. Clone and Install Dependencies
+### 1. Install Dependencies
 
 ```bash
-git clone <https://github.com/fwinford/daily-agenda>
+git clone https://github.com/fwinford/daily-agenda
 cd daily-agenda
 python3 -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 2. Set up Environment Variables
-
-Copy the example environment file and fill in your details:
+### 2. Configure Environment Variables
 
 ```bash
 cp config/.env.example config/.env
@@ -83,254 +90,116 @@ Edit `config/.env` with your information:
 
 ```bash
 TO_EMAIL="your@email.com"
-SMTP_HOST="smtp.gmail.com"
+SMTP_HOST="smtp.gmail.com"          # Gmail settings
 SMTP_PORT="465"
 SMTP_USER="your@gmail.com"
-SMTP_PASS="your_app_password"
-TIMEZONE="America/New_York"
-ICS_URLS="https://your-calendar-url-1.ics,https://your-calendar-url-2.ics"
-NOTION_TOKEN="your_notion_integration_token"
+SMTP_PASS="your_app_password"       # See Gmail setup below
+TIMEZONE="America/New_York"         # Your local timezone
+ICS_URLS="https://your-calendar-url.ics"
+NOTION_TOKEN="your_notion_token"    # See Notion setup below
 ```
 
-### 3. Configure Your Notion Integration
+⚠ **Important**: Use app passwords for email, not your main password
 
-#### Create a Notion Integration:
-1. Go to [https://www.notion.so/my-integrations](https://www.notion.so/my-integrations)
-2. Click **"New integration"**
-3. Name it something like "daily agenda"
-4. Select your workspace
-5. Copy the **"Internal Integration Token"**
-6. Paste it as `NOTION_TOKEN` in your `.env` file
+### 3. Set Up Notion Integration
 
-#### Get Your Database IDs:
-1. Open your notion database in a web browser
-2. Copy the URL - it looks like: `https://www.notion.so/YOUR_DATABASE_ID?v=...`
-3. Extract the database ID (the long string between `/` and `?`)
+1. **Create integration**: Go to [notion.so/my-integrations](https://www.notion.so/my-integrations)
+2. **New integration** → Name it "daily agenda" → Copy the token
+3. **Get database ID**: From your database URL: `notion.so/DATABASE_ID?v=...`
+4. **Share databases**: In each database, click "..." → "Connections" → Connect your integration
 
-#### Share Databases with Integration:
-1. In each notion database, click the **"..."** menu (top right)
-2. Click **"Connections"** → **"Connect to"** → select your integration
-
-### 4. Configure Your Databases
-
-Edit `config/config.yaml` with your database IDs and desired fields:
+Edit `config/config.yaml`:
 
 ```yaml
 databases:
-  "YOUR_FIRST_DATABASE_ID":              # replace with actual notion database id
-    name: "My Tasks"                     # optional: friendly name (auto-detected if not provided)
-    date_property: "Due Date"            # required: name of your date property  
-    fields: ["Priority", "Status"]       # optional: additional fields to show
-  "YOUR_SECOND_DATABASE_ID":             # replace with actual notion database id
-    name: "Projects"                     # optional: friendly name
-    date_property: "Deadline"            # required: name of your date property
-    fields: ["Category", "Owner"]        # optional: additional fields to show
+  "YOUR_DATABASE_ID":
+    name: "Tasks"                    # Optional friendly name
+    date_property: "Due Date"        # Required: your date column name
+    fields: ["Priority", "Status"]   # Optional: extra fields to show
 ```
 
-**important notes:**
-- **database_id**: get this from your notion database URL
-- **date_property**: must match the exact name of your date column in notion
-- **fields**: should match the exact names of properties in your notion database
-- **name**: optional - if not provided, the system will auto-detect the database name
+**Common date property names**: "Due Date", "Deadline", "Date", "Due"
 
-**common date property names:**
-- "Due Date", "Deadline", "Date", "Due", "Scheduled", "Target Date"
+### 4. Set Up Email Authentication
 
-**Field Types Supported:**
-- Text fields
-- Select/Multi-select fields
-- Relation fields (shows linked page titles)
-- People fields
-- URL/Email/Phone fields
+**For Gmail**:
+1. Enable 2-factor authentication
+2. Go to [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)
+3. Generate app password for "daily agenda"
+4. Use this 16-character password as `SMTP_PASS`
 
-### 5. Set up Email Authentication
+**Other providers**:
+✮ **Outlook**: `smtp-mail.outlook.com:587`
+✮ **Yahoo**: `smtp.mail.yahoo.com:587`
 
-#### For Gmail:
-1. **enable 2-factor authentication** on your gmail account
-2. Go to [Google App Passwords](https://myaccount.google.com/apppasswords)
-3. Generate an app password for "daily agenda"
-4. Use this 16-character password as `SMTP_PASS` in `.env`
-5. Use these settings:
-   ```
-   SMTP_HOST="smtp.gmail.com"
-   SMTP_PORT="465"
-   ```
+### 5. Get Calendar URLs
 
-#### For Other Email Providers:
-- **outlook**: `smtp-mail.outlook.com:587`
-- **yahoo**: `smtp.mail.yahoo.com:587`
-- check your provider's SMTP settings
+**iCloud Calendars**:
+1. Calendar app → Right-click calendar → "Share Calendar" → "Public"
+2. Copy webcal URL and change `webcal://` to `https://`
 
-### 6. Get Calendar ICS URLs
+**Google Calendars**:
+1. Google Calendar settings → Your calendar → "Integrate Calendar" 
+2. Copy "Secret address in iCal format"
 
-The system supports multiple calendar types and can combine events from all of them:
+**Multiple calendars**: Separate URLs with commas in `.env` file
 
-#### Apple/iCloud Calendars:
-1. Open Calendar app on Mac/iOS
-2. Right-click your calendar → **"Share Calendar"**
-3. Make it **"Public"**
-4. Copy the webcal URL and change `webcal://` to `https://`
-5. **Multiple calendars**: You can add as many iCloud calendars as you want
-
-Example iCloud URLs:
-```
-https://p108-caldav.icloud.com/published/2/MTY1ODU3MDgxNzQxNjU4Ne...
-```
-
-#### Google Calendars:
-1. Open Google Calendar settings
-2. Click on your calendar → **"Integrate Calendar"**
-3. Copy the **"Secret address in iCal format"** (not the embed URL)
-4. **Multiple Google calendars**: Each calendar has its own ICS URL
-
-To convert a Google Calendar embed URL to ICS format:
-- **From**: `https://calendar.google.com/calendar/embed?src=nyu.edu_85g8...&ctz=America%2FNew_York`
-- **To**: `https://calendar.google.com/calendar/ical/nyu.edu_85g8.../public/basic.ics`
-
-#### Adding Multiple Calendars:
-In your `config/.env` file, separate multiple URLs with commas:
-```bash
-ICS_URLS="https://your-icloud-calendar1.ics,https://your-icloud-calendar2.ics,https://calendar.google.com/calendar/ical/your-google-cal/public/basic.ics"
-```
-
-#### Other Calendar Sources:
-- **Outlook/Exchange**: Most provide ICS/webcal URLs in sharing settings
-- **University calendars**: Often provide public ICS feeds
-- **Any ICS feed**: The system works with any valid ICS URL
-
-### 7. Timezone Configuration
-
-**Important**: Set your local timezone in `config/.env` for accurate event times:
+### 6. Test Your Setup
 
 ```bash
-TIMEZONE="America/New_York"
+python scripts/test_simple.py      # Basic verification
+python scripts/debug.py --preview-only  # Preview without sending
+python main.py                     # Send test email
 ```
 
-**Common timezones:**
-- `America/New_York` (Eastern Time)
-- `America/Chicago` (Central Time) 
-- `America/Denver` (Mountain Time)
-- `America/Los_Angeles` (Pacific Time)
-- `Europe/London` (GMT/BST)
-- `Europe/Paris` (CET/CEST)
-- `Asia/Tokyo` (JST)
-- `Australia/Sydney` (AEST/AEDT)
+## Usage
 
-**How timezone handling works:**
-- All calendar events are converted to your local timezone
-- All-day events are properly detected and displayed
-- Notion due dates are interpreted in your local timezone
-- Email timestamps use your timezone
-
-**Finding your timezone:**
-1. **Linux/Mac**: Run `timedatectl` or check `/etc/timezone`
-2. **Python**: `python -c "import time; print(time.tzname)"`
-3. **Online**: Search for "timezone database" + your city
-
-### 8. Test Your Setup
-
-```bash
-# Run unit tests to verify components
-python run_tests.py
-
-# Test basic setup
-python scripts/test_simple.py
-
-# Preview without sending email
-python scripts/debug.py --preview-only
-
-# Test the full application (dry run)
-python -c "
-import main
-cfg = main.load_config()
-print('Config loaded successfully!')
-print(f'Databases: {len(cfg[\"db_map\"])}')
-print(f'ICS URLs: {len(cfg[\"ics_urls\"])}')
-"
-
-# Run the full application
-python main.py
-```
-
-## usage
-
-### Run Once
+**Run once**:
 ```bash
 python main.py
 ```
 
-### Automate with Cron (Linux/Mac)
-add to your crontab to run daily at 7 AM:
+**Automate daily at 7 AM**:
+
+Linux/Mac (crontab):
 ```bash
 crontab -e
-# add this line:
-0 7 * * * cd /path/to/daily-agenda && python main.py
+# Add this line (replace /full/path/to with your actual path):
+0 7 * * * cd /full/path/to/daily-agenda && /full/path/to/daily-agenda/.venv/bin/python main.py
 ```
 
-### Automate with Task Scheduler (Windows)
-1. open task scheduler
-2. create a new task
-3. set trigger for daily at 7 AM
-4. set action to run: `C:\path\to\daily-agenda\.venv\Scripts\python.exe main.py`
-5. set start in: `C:\path\to\daily-agenda`
+Windows (Task Scheduler):
+1. Open Task Scheduler → Create Basic Task
+2. Set trigger for daily 7 AM
+3. Action: Start a program
+4. Program: `C:\full\path\to\daily-agenda\.venv\Scripts\python.exe`
+5. Arguments: `main.py`
+6. Start in: `C:\full\path\to\daily-agenda`
 
-## testing
+## Development & Testing
 
 ```bash
-# Run all tests
-python run_tests.py
-
-# Run with coverage (if available)
-python run_tests.py --coverage
-
-# Run specific test file
-python -m unittest tests.test_notion
+python run_tests.py                          # Run all tests
+python scripts/debug.py --preview-only       # Preview without sending
+python scripts/debug.py --date 2025-08-14 --preview-only  # Test specific date
+python scripts/test_calendar.py              # Test calendar URLs
 ```
-
-## customization
-
-### Adding New Database Fields
-1. add the field name to the `fields` array in `config/config.yaml`
-2. the system automatically detects field types and formats them
-
-### Changing Email Template
-edit `app/render.py` to customize the HTML email template.
-
-### Adding New Calendar Sources
-add ICS URLs to the `ICS_URLS` environment variable in `config/.env` (comma-separated).
-
-### Timezone Configuration
-set your timezone in `config/.env`:
-```bash
-TIMEZONE="America/New_York"  # or "Europe/London", "Asia/Tokyo", etc.
-```
-
-## Security Notes
-
-- **never commit `config/.env`** - it contains secrets
-- **use app passwords** for email (not your main password)
-- **keep notion tokens secure** - they have access to your databases
-- the `config/.env` file is already in `.gitignore`
 
 ## Troubleshooting
 
-### Email Issues
-- **x 401 unauthorized**: check if you're using an app password, not your main password
-- **x timeout**: try port 465 (SSL) instead of 587 (TLS)
-- **x "less secure apps"**: use app passwords instead
+**Email Issues**:
+✗ **401 unauthorized** → Use app password, not main password
+✗ **Timeout** → Try port 465 (SSL) instead of 587 (TLS)
 
-### Notion Issues
-- **x 401/403 errors**: make sure you've shared your databases with the integration
-- **x empty fields**: check that field names in `config/config.yaml` match exactly
-- **x missing relations**: the system automatically fetches related page titles
+**Notion Issues**:
+✗ **401/403 errors** → Share databases with your integration
+✗ **Empty fields** → Check field names match exactly in `config/config.yaml`
 
-### Calendar Issues
-- **x no events**: verify your ICS URLs are public and accessible
-- **x wrong timezone**: check the `TIMEZONE` setting in `config/.env`
+**Calendar Issues**:
+✗ **No events** → Verify ICS URLs are public and accessible
+✗ **Wrong timezone** → Check `TIMEZONE` setting in `config/.env`
 
 ## Example Output
-
-your daily agenda email will look like:
 
 ```
 Today's Agenda - Wednesday, Aug 13
@@ -347,19 +216,27 @@ Due Tomorrow:
 * Project Proposal (Business Strategy - Essay)
 ```
 
+## Security Notes
+
+⚠ **Never commit `config/.env`** - it contains secrets
+⚠ **Use app passwords** for email (not your main password)  
+⚠ **Keep Notion tokens secure** - they access your databases
+
+## Advanced Configuration
+
+**Add database fields**: Edit `fields` array in `config/config.yaml`
+**Change email template**: Edit `app/render.py`
+**Add calendar sources**: Add ICS URLs to `.env` (comma-separated)
+**Common timezones**: `America/New_York`, `Europe/London`, `Asia/Tokyo`
+
 ## Contributing
 
-1. fork the repository
-2. create a feature branch
-3. make your changes
-4. add tests for new functionality
-5. run the test suite
-6. submit a pull request
+1. Fork the repository
+2. Create a feature branch
+3. Add tests for new functionality  
+4. Run the test suite
+5. Submit a pull request
 
 ## License
 
-this project is open source. feel free to use and modify as needed.
-
----
-
-**Happy organizing!**
+This project is open source. Feel free to use and modify as needed.
