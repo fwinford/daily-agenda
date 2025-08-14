@@ -9,7 +9,7 @@ databases:
     name: Assignments
     date_property: Date
     fields: [Class, Type]
-  "164ea571fb9c818da30efaf87ecd99f1":   # Tasks/Todolist
-    name: todolist
-    date_property: due
-    fields: [task]
+  # "164ea571fb9c818da30efaf87ecd99f1":   # Tasks/Todolist - Temporarily disabled due to connection issue
+  #   name: todolist
+  #   date_property: due
+  #   fields: [task]

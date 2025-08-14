@@ -113,7 +113,7 @@ def _render_due_list(items: List[Dict]) -> str:
         
         metadata_html = ""
         if metadata_parts:
-            metadata_html = f'<div style="font-size:13px; color:#6b7280; margin-top:2px;">{" · ".join(metadata_parts)}</div>'
+            metadata_html = f'<div style="font-size:13px; color:#6b7280; margin-top:2px; margin-left:24px;">{" · ".join(metadata_parts)}</div>'
         
         list_items.append(f'<div style="margin:8px 0; line-height:1.4;">{title_html}{metadata_html}</div>')
     
@@ -209,9 +209,9 @@ def build_html(tz, events: List[Dict], due_today: List[Dict], due_tomorrow: List
             end_time = _fmt_time(event["end"])
             time_range = f"{start_time}-{end_time}"
             
-            # Build the event details with calendar pill
-            pill_html = f'<span style="background:#f3f4f6; color:#6b7280; padding:2px 8px; border-radius:12px; font-size:12px; margin-left:8px;">{calendar}</span>'
-            event_html = f'<strong style="color:#111827;">{title}</strong>{pill_html}'
+            # Build the event details with calendar pill before the title
+            pill_html = f'<span style="background:#f3f4f6; color:#6b7280; padding:2px 8px; border-radius:12px; font-size:12px; margin-right:8px;">{calendar}</span>'
+            event_html = f'{pill_html}<strong style="color:#111827;">{title}</strong>'
             
             # Add overlap warning if this event conflicts with others
             if overlapped[i]:
@@ -222,7 +222,7 @@ def build_html(tz, events: List[Dict], due_today: List[Dict], due_tomorrow: List
                 next_event = timed_events[i + 1]
                 gap_minutes = minutes_between(event["end"], next_event["start"])
                 if 0 < gap_minutes < 15:  # Less than 15 minutes between events
-                    event_html += f' <span style="color:#dc2626; font-size:12px;">• only {gap_minutes} min gap</span>'
+                    event_html += f' <span style="color:#dc2626; font-size:12px;">✮ only {gap_minutes} min gap</span>'
             
             # Add location and notes
             details = []
