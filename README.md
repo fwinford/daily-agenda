@@ -67,6 +67,7 @@ Copy the example environment file and fill in your details:
 
 ```bash
 cp .env.example .env
+open -e .env #If you don't have an IDE
 ```
 
 Edit `.env` with your information:
