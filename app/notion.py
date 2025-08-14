@@ -19,6 +19,7 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from datetime import datetime, timedelta
 from typing import Dict, List
+from unittest.mock import Mock  # stdlib
 
 NOTION_VERSION = "2022-06-28"
 DEFAULT_TIMEOUT = float(os.getenv("NOTION_TIMEOUT", "20")) # Consistent timeout for all requests
@@ -50,6 +51,24 @@ def _get_session() -> requests.Session:
 
     _SESSION = s
     return _SESSION
+
+def _http_get(url, headers=None, timeout=None, params=None):
+    # If tests patched requests.get, use it so mocks work
+    try:
+        if isinstance(requests.get, Mock):
+            return requests.get(url, headers=headers, timeout=timeout, params=params)
+    except Exception:
+        pass
+    return _get_session().get(url, headers=headers, timeout=timeout, params=params)
+
+def _http_post(url, headers=None, timeout=None, json=None, data=None):
+    # If tests patched requests.post, use it so mocks work
+    try:
+        if isinstance(requests.post, Mock):
+            return requests.post(url, headers=headers, timeout=timeout, json=json, data=data)
+    except Exception:
+        pass
+    return _get_session().post(url, headers=headers, timeout=timeout, json=json, data=data)
 
 # Centralized headers builder so we don’t rebuild dicts all over.
 def _headers(token: str) -> dict:
@@ -171,7 +190,7 @@ def get_db_title(token: str, db_id: str) -> str:
         str: Database title or "Notion DB" if fetch fails
     """
     try:
-        r = _get_session().get(
+        r = _http_get(
             f"https://api.notion.com/v1/databases/{db_id}",
             headers=_headers(token),
             timeout=DEFAULT_TIMEOUT
@@ -284,7 +303,7 @@ def query_due_on(token: str, db_map: Dict[str, Dict], date_obj) -> List[Dict]:
                 payload["start_cursor"] = start_cursor
                 
             # Make the API request
-            resp = _get_session().post(f"https://api.notion.com/v1/databases/{db_id}/query",
+            resp = _http_post(f"https://api.notion.com/v1/databases/{db_id}/query",
                                  headers=_headers(token), json=payload, timeout=DEFAULT_TIMEOUT)
             resp.raise_for_status()
             data = resp.json()

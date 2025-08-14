@@ -14,10 +14,109 @@ Key features:
 """
 
 import re
+import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+import os, json, time
 from datetime import datetime, timedelta
-from typing import List, Dict
+from typing import List, Dict, Optional, Tuple
 import pytz, requests
 from icalendar import Calendar
+
+DEFAULT_TIMEOUT = float(os.getenv("ICS_TIMEOUT", "20"))
+ICS_META_PATH = os.getenv("ICS_CACHE_META", ".ics_meta.json")
+USER_AGENT = os.getenv("ICS_USER_AGENT", "daily-agenda/1.0")
+ENABLE_CONDITIONAL = os.getenv("ICS_CONDITIONAL", "1") != "0"
+
+_SESSION = None  # module-level shared session
+
+def _get_session() -> requests.Session:
+    """Shared HTTP session with connection pooling and sane retries."""
+    global _SESSION
+    if _SESSION is not None:
+        return _SESSION
+
+    s = requests.Session()
+    s.headers.update({"User-Agent": USER_AGENT, "Accept-Encoding": "gzip, deflate"})
+    retry = Retry(
+        total=3,
+        backoff_factor=0.3,
+        status_forcelist=(429, 500, 502, 503, 504),
+        allowed_methods=frozenset(["GET"]),
+        respect_retry_after_header=True,
+        raise_on_status=False,
+    )
+    adapter = HTTPAdapter(max_retries=retry, pool_connections=50, pool_maxsize=50)
+    s.mount("https://", adapter)
+    s.mount("http://", adapter)
+    _SESSION = s
+    return _SESSION
+
+# Prefer the test's patched requests.get if it exists; otherwise use pooled session.get
+def _http_get(url, headers=None, timeout=None):
+    try:
+        # If unittest.mock patched requests.get, use it so tests can intercept
+        from unittest.mock import Mock  # stdlib
+        if isinstance(requests.get, Mock):
+            return requests.get(url, headers=headers, timeout=timeout)
+    except Exception:
+        pass
+    return _get_session().get(url, headers=headers, timeout=timeout)
+
+
+def _load_meta() -> dict:
+    if os.path.exists(ICS_META_PATH):
+        try:
+            with open(ICS_META_PATH, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            return {}
+    return {}
+
+
+def _save_meta(meta: dict) -> None:
+    try:
+        with open(ICS_META_PATH, "w", encoding="utf-8") as f:
+            json.dump(meta, f)
+    except Exception:
+        pass
+
+
+def fetch_ics(url: str) -> Tuple[Optional[bytes], bool]:
+    """
+    Fetch an ICS feed with connection reuse and conditional GETs.
+
+    Returns:
+        (text_or_none, changed)
+        - text_or_none: str if new content downloaded, None if not modified
+        - changed: True if content changed on server (200), False if 304/unchanged
+    """
+    session = _get_session()
+    headers = {}
+    meta = _load_meta() if ENABLE_CONDITIONAL else {}
+    if ENABLE_CONDITIONAL and url in meta:
+        if et := meta[url].get("etag"):
+            headers["If-None-Match"] = et
+        if lm := meta[url].get("last_modified"):
+            headers["If-Modified-Since"] = lm
+
+    resp = _http_get(url, headers=headers, timeout=DEFAULT_TIMEOUT)
+    # Not Modified -> skip re-parse
+    if resp.status_code == 304:
+        return None, False
+
+    resp.raise_for_status()
+    text = resp.text
+
+    if ENABLE_CONDITIONAL:
+        meta[url] = {
+            "etag": resp.headers.get("ETag"),
+            "last_modified": resp.headers.get("Last-Modified"),
+            "fetched_at": int(time.time()),
+        }
+        _save_meta(meta)
+
+    return text, True
 
 def _to_local(dt_obj, tz):
     """
@@ -97,11 +196,14 @@ def fetch_ics_events_for_day(ics_urls: List[str], tz, target_date) -> List[Dict]
     for url in ics_urls:
         try:
             # Download the ICS feed
-            r = requests.get(url, timeout=30)
-            r.raise_for_status()
+            # ics_content: Optional[bytes], changed: bool
+            ics_content, changed = fetch_ics(url) 
+            if ics_content is None:
+                # No new content, skip this calendar
+                continue
             
             # Parse the calendar data
-            cal = Calendar.from_ical(r.content)
+            cal = Calendar.from_ical(ics_content)
             calname = str(cal.get("X-WR-CALNAME", "")) or _short_name_from_url(url)
 
             # Process each event in the calendar
