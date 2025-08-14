@@ -120,7 +120,7 @@ def _render_due_list(items: List[Dict]) -> str:
     return "".join(list_items)
 
 
-def build_html(tz, events: List[Dict], due_today: List[Dict], due_tomorrow: List[Dict]) -> str:
+def build_html(tz, events: List[Dict], due_today: List[Dict], due_tomorrow: List[Dict], target_datetime=None) -> str:
     """
     Build the complete HTML content for the daily agenda email.
     
@@ -161,7 +161,11 @@ def build_html(tz, events: List[Dict], due_today: List[Dict], due_tomorrow: List
                 overlapped[i] = overlapped[j] = True
 
     # Generate the day label for the header
-    now_local = datetime.now(tz)
+    if target_datetime:
+        now_local = target_datetime
+    else:
+        now_local = datetime.now(tz)
+    
     if events:
         day_label = events[0]["start"].strftime("%A, %B %-d")
     else:

@@ -1,55 +1,63 @@
 # Daily Agenda Email System
 
 A Python application that automatically generates and emails a personalized daily agenda by combining:
-- Calendar events from ICS feeds (like iCloud, Google Calendar)
+- Calendar events from ICS feeds (like iCloud, Google Calendar)  
 - Tasks and assignments from Notion databases
 - Beautiful HTML email formatting
-
-## what it does
-
-The application:
-1. **Fetches calendar events** for today from your ICS calendar feeds
-2. **Queries Notion databases** for tasks due today and tomorrow
-3. **Generates a beautiful HTML email** with all your agenda items
-4. **Sends the email** to your specified address
-
-**Flexibility**: The system works with any Notion database structure - just configure your date property names and field names in `config.yaml`.
-
-## Features
-
-## what it does
-
-- ✓ **Multiple calendar support** via ICS URLs
-- ✓ **Notion integration** with custom database fields
-- ✓ **Relation field support** (shows linked class names, etc.)
-- ✓ **Overlap detection** for conflicting calendar events
-- ✓ **Customizable fields** per database (Company, Class, Type, etc.)
-- ✓ **SSL/TLS email support** (Gmail, Outlook, etc.)
-- ✓ **Comprehensive testing** with unit tests
 
 ## Project Structure
 
 ```
 daily-agenda/
-├── .env                    # Environment variables (not in git)
-├── .env.example           # Example environment file
-├── config.yaml            # Database configuration
-├── main.py                # Main application entry point
-├── requirements.txt       # Python dependencies
-├── run_tests.py          # Test runner
-├── app/                  # Application modules
+├── app/                    # Core application modules
 │   ├── __init__.py
-│   ├── calendars.py      # Calendar/ICS fetching
-│   ├── emailer.py        # Email sending
-│   ├── notion.py         # Notion API integration
-│   └── render.py         # HTML email rendering
-└── tests/                # Unit tests
-    ├── test_calendars.py
-    ├── test_daily_agenda.py
-    ├── test_email.py
-    ├── test_main.py
-    └── test_notion.py
+│   ├── calendars.py        # Calendar/ICS fetching
+│   ├── emailer.py          # Email sending
+│   ├── notion.py           # Notion API integration
+│   └── render.py           # HTML email rendering
+├── config/                 # Configuration files
+│   ├── .env               # Environment variables (create from .env.example)
+│   ├── config.yaml        # Database configuration
+│   └── config.yaml.example # Template
+├── scripts/                # Utility & debug scripts
+│   ├── debug.py           # Preview & date override tools
+│   ├── test_calendar.py   # Calendar URL testing utility
+│   └── test_simple.py     # Basic setup verification
+├── tests/                  # Unit tests
+│   ├── test_calendars.py
+│   ├── test_daily_agenda.py
+│   ├── test_email.py
+│   ├── test_main.py
+│   └── test_notion.py
+├── main.py                 # Main application entry point
+├── run_tests.py           # Test runner
+└── requirements.txt       # Python dependencies
 ```
+
+## Quick Commands
+
+```bash
+# Normal operation
+python main.py
+
+# Development & testing
+python run_tests.py                    # Run all unit tests
+python scripts/debug.py --preview-only # Preview without sending email
+python scripts/debug.py --date 2025-08-14 --preview-only # Test specific date
+python scripts/test_simple.py          # Basic setup check
+python scripts/test_calendar.py        # Test calendar URLs
+```
+
+## Features
+
++ **Multiple calendar support** via ICS URLs
++ **Notion integration** with custom database fields  
++ **Relation field support** (shows linked class names, etc.)
++ **Overlap detection** for conflicting calendar events
++ **Customizable fields** per database (Company, Class, Type, etc.)
++ **SSL/TLS email support** (Gmail, Outlook, etc.)
++ **Comprehensive testing** with unit tests
++ **Debug & preview tools** for development
 
 ## Setup Instructions
 
@@ -68,10 +76,10 @@ pip install -r requirements.txt
 Copy the example environment file and fill in your details:
 
 ```bash
-cp .env.example .env
+cp config/.env.example config/.env
 ```
 
-Edit `.env` with your information:
+Edit `config/.env` with your information:
 
 ```bash
 TO_EMAIL="your@email.com"
@@ -105,7 +113,7 @@ NOTION_TOKEN="your_notion_integration_token"
 
 ### 4. Configure Your Databases
 
-Edit `config.yaml` with your database IDs and desired fields:
+Edit `config/config.yaml` with your database IDs and desired fields:
 
 ```yaml
 databases:
@@ -180,7 +188,7 @@ To convert a Google Calendar embed URL to ICS format:
 - **To**: `https://calendar.google.com/calendar/ical/nyu.edu_85g8.../public/basic.ics`
 
 #### Adding Multiple Calendars:
-In your `.env` file, separate multiple URLs with commas:
+In your `config/.env` file, separate multiple URLs with commas:
 ```bash
 ICS_URLS="https://your-icloud-calendar1.ics,https://your-icloud-calendar2.ics,https://calendar.google.com/calendar/ical/your-google-cal/public/basic.ics"
 ```
@@ -192,7 +200,7 @@ ICS_URLS="https://your-icloud-calendar1.ics,https://your-icloud-calendar2.ics,ht
 
 ### 7. Timezone Configuration
 
-**Important**: Set your local timezone in `.env` for accurate event times:
+**Important**: Set your local timezone in `config/.env` for accurate event times:
 
 ```bash
 TIMEZONE="America/New_York"
@@ -222,11 +230,17 @@ TIMEZONE="America/New_York"
 ### 8. Test Your Setup
 
 ```bash
-# Test individual components
-./.venv/bin/python run_tests.py
+# Run unit tests to verify components
+python run_tests.py
+
+# Test basic setup
+python scripts/test_simple.py
+
+# Preview without sending email
+python scripts/debug.py --preview-only
 
 # Test the full application (dry run)
-./.venv/bin/python -c "
+python -c "
 import main
 cfg = main.load_config()
 print('Config loaded successfully!')
@@ -235,14 +249,14 @@ print(f'ICS URLs: {len(cfg[\"ics_urls\"])}')
 "
 
 # Run the full application
-./.venv/bin/python main.py
+python main.py
 ```
 
 ## usage
 
 ### Run Once
 ```bash
-./.venv/bin/python main.py
+python main.py
 ```
 
 ### Automate with Cron (Linux/Mac)
@@ -250,7 +264,7 @@ add to your crontab to run daily at 7 AM:
 ```bash
 crontab -e
 # add this line:
-0 7 * * * cd /path/to/daily-agenda && ./.venv/bin/python main.py
+0 7 * * * cd /path/to/daily-agenda && python main.py
 ```
 
 ### Automate with Task Scheduler (Windows)
@@ -264,57 +278,57 @@ crontab -e
 
 ```bash
 # Run all tests
-./.venv/bin/python run_tests.py
+python run_tests.py
 
-# Run with coverage
-./.venv/bin/python run_tests.py --coverage
+# Run with coverage (if available)
+python run_tests.py --coverage
 
 # Run specific test file
-./.venv/bin/python -m unittest tests.test_notion
+python -m unittest tests.test_notion
 ```
 
 ## customization
 
 ### Adding New Database Fields
-1. add the field name to the `fields` array in `config.yaml`
+1. add the field name to the `fields` array in `config/config.yaml`
 2. the system automatically detects field types and formats them
 
 ### Changing Email Template
 edit `app/render.py` to customize the HTML email template.
 
 ### Adding New Calendar Sources
-add ICS URLs to the `ICS_URLS` environment variable (comma-separated).
+add ICS URLs to the `ICS_URLS` environment variable in `config/.env` (comma-separated).
 
 ### Timezone Configuration
-set your timezone in `.env`:
+set your timezone in `config/.env`:
 ```bash
 TIMEZONE="America/New_York"  # or "Europe/London", "Asia/Tokyo", etc.
 ```
 
 ## Security Notes
 
-- **never commit `.env`** - it contains secrets
+- **never commit `config/.env`** - it contains secrets
 - **use app passwords** for email (not your main password)
 - **keep notion tokens secure** - they have access to your databases
-- the `.env` file is already in `.gitignore`
+- the `config/.env` file is already in `.gitignore`
 
 ## Troubleshooting
 
 ### Email Issues
-- **✕ 401 unauthorized**: check if you're using an app password, not your main password
-- **✕ timeout**: try port 465 (SSL) instead of 587 (TLS)
-- **✕ "less secure apps"**: use app passwords instead
+- **x 401 unauthorized**: check if you're using an app password, not your main password
+- **x timeout**: try port 465 (SSL) instead of 587 (TLS)
+- **x "less secure apps"**: use app passwords instead
 
 ### Notion Issues
-- **✕ 401/403 errors**: make sure you've shared your databases with the integration
-- **✕ empty fields**: check that field names in `config.yaml` match exactly
-- **✕ missing relations**: the system automatically fetches related page titles
+- **x 401/403 errors**: make sure you've shared your databases with the integration
+- **x empty fields**: check that field names in `config/config.yaml` match exactly
+- **x missing relations**: the system automatically fetches related page titles
 
 ### Calendar Issues
-- **✕ no events**: verify your ICS URLs are public and accessible
-- **✕ wrong timezone**: check the `TIMEZONE` setting in `.env`
+- **x no events**: verify your ICS URLs are public and accessible
+- **x wrong timezone**: check the `TIMEZONE` setting in `config/.env`
 
-## 📈 Example Output
+## Example Output
 
 your daily agenda email will look like:
 
@@ -322,18 +336,18 @@ your daily agenda email will look like:
 Today's Agenda - Wednesday, Aug 13
 
 Calendar Events:
-• 9:00 AM - 10:00 AM: Team Meeting (Conference Room A)
-• 12:00 PM - 1:30 PM: Lunch with Client (Restaurant XYZ)
+* 9:00 AM - 10:00 AM: Team Meeting (Conference Room A)
+* 12:00 PM - 1:30 PM: Lunch with Client (Restaurant XYZ)
 
 Due Today:
-• Submit Application (Tech Corp - Full-time)
+* Submit Application (Tech Corp - Full-time)
 
 Due Tomorrow:  
-• CS 101 Homework (Computer Science - Assignment)
-• Project Proposal (Business Strategy - Essay)
+* CS 101 Homework (Computer Science - Assignment)
+* Project Proposal (Business Strategy - Essay)
 ```
 
-## 🤝 Contributing
+## Contributing
 
 1. fork the repository
 2. create a feature branch
@@ -342,7 +356,7 @@ Due Tomorrow:
 5. run the test suite
 6. submit a pull request
 
-## 📄 License
+## License
 
 this project is open source. feel free to use and modify as needed.
 

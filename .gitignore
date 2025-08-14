@@ -1,5 +1,7 @@
-# Environment variables
+# Environment variables and config
 .env
+config/.env
+config/config.yaml
 config.yaml
 config.yaml.backup
 

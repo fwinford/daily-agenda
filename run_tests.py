@@ -33,7 +33,7 @@ def run_tests():
     Returns:
         int: Exit code (0 for success, 1 for failures)
     """
-    print("✮ running daily agenda unit tests")
+    print("running daily agenda unit tests")
     print("=" * 50)
     
     # Change to project directory to ensure proper imports
@@ -48,9 +48,9 @@ def run_tests():
     
     # Display final result with appropriate symbol
     if result.returncode == 0:
-        print("\n✓ all tests passed!")
+        print("\nall tests passed!")
     else:
-        print("\n✕ some tests failed!")
+        print("\nsome tests failed!")
         
     return result.returncode
 

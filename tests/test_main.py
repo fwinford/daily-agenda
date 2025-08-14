@@ -132,5 +132,39 @@ class TestMainApplication(unittest.TestCase):
         mock_build_html.assert_called_once()
         mock_send_email.assert_called_once()
 
+    @patch('main.send_email')
+    @patch('main.build_html')
+    @patch('main.query_due_on')
+    @patch('main.fetch_ics_events_for_day')
+    def test_run_once_with_target_date(self, mock_fetch_events, mock_query_due, mock_build_html, mock_send_email):
+        """Test run_once with a specific target date"""
+        
+        # Setup mocks
+        mock_fetch_events.return_value = []
+        mock_query_due.return_value = []
+        mock_build_html.return_value = "<html>Test with date</html>"
+        mock_send_email.return_value = None
+        
+        # Test with specific date
+        target_date = date(2025, 8, 14)
+        main.run_once(target_date=target_date, preview_only=True)
+        
+        # Verify the functions were called with correct dates
+        mock_fetch_events.assert_called_once()
+        args, kwargs = mock_fetch_events.call_args
+        self.assertEqual(args[2], target_date)  # third argument should be target_date
+        
+        # Verify query_due_on was called for target_date and target_date + 1
+        self.assertEqual(mock_query_due.call_count, 2)
+        due_today_call = mock_query_due.call_args_list[0]
+        due_tomorrow_call = mock_query_due.call_args_list[1]
+        
+        self.assertEqual(due_today_call[0][2], target_date)  # today
+        self.assertEqual(due_tomorrow_call[0][2], date(2025, 8, 15))  # tomorrow
+        
+        # Verify build_html was called and email was not sent (preview_only=True)
+        mock_build_html.assert_called_once()
+        mock_send_email.assert_not_called()
+
 if __name__ == "__main__":
     unittest.main()

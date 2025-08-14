@@ -185,13 +185,54 @@ def query_due_on(token: str, db_map: Dict[str, Dict], date_obj) -> List[Dict]:
         wanted    = cfg.get("fields") or []              # Extra fields to include
         db_name   = cfg.get("name") or get_db_title(token, db_id)  # Display name
 
-        # Build the Notion API query
-        # This filters for items where the date property equals our target date
-        payload = {
-            "filter": {"property": date_prop, "date": {"equals": iso_day}},
-            "sorts": [{"property": date_prop, "direction": "ascending"}],
-            "page_size": 100
-        }
+        # Get database schema to determine property type
+        try:
+            db_resp = requests.get(f"https://api.notion.com/v1/databases/{db_id}", 
+                                 headers=headers, timeout=30)
+            db_resp.raise_for_status()
+            db_info = db_resp.json()
+            properties = db_info.get("properties", {})
+            
+            prop_info = properties.get(date_prop, {})
+            prop_type = prop_info.get("type", "date")  # Default to date
+            
+        except:
+            prop_type = "date"  # Fallback to date type
+        
+        # Build the Notion API query based on property type
+        if prop_type == "created_time":
+            # For created_time properties, query by creation date range
+            # Use a tight 24-hour window to avoid overlaps between days
+            start_of_day = f"{iso_day}T00:00:00.000-04:00"  # Eastern Time
+            end_of_day = f"{iso_day}T23:59:59.999-04:00"
+            
+            payload = {
+                "filter": {
+                    "and": [
+                        {
+                            "property": date_prop,
+                            "created_time": {
+                                "on_or_after": start_of_day
+                            }
+                        },
+                        {
+                            "property": date_prop,
+                            "created_time": {
+                                "on_or_before": end_of_day
+                            }
+                        }
+                    ]
+                },
+                "sorts": [{"property": date_prop, "direction": "ascending"}],
+                "page_size": 100
+            }
+        else:
+            # For regular date properties, use exact match
+            payload = {
+                "filter": {"property": date_prop, "date": {"equals": iso_day}},
+                "sorts": [{"property": date_prop, "direction": "ascending"}],
+                "page_size": 100
+            }
 
         # Handle pagination (Notion returns results in pages)
         start_cursor = None
