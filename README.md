@@ -274,19 +274,6 @@ crontab -e
 4. set action to run: `C:\path\to\daily-agenda\.venv\Scripts\python.exe main.py`
 5. set start in: `C:\path\to\daily-agenda`
 
-## testing
-
-```bash
-# Run all tests
-python run_tests.py
-
-# Run with coverage (if available)
-python run_tests.py --coverage
-
-# Run specific test file
-python -m unittest tests.test_notion
-```
-
 ## customization
 
 ### Adding New Database Fields
