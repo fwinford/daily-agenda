@@ -20,6 +20,7 @@ from app.notion import query_due_on
 from app.render import build_html
 from app.emailer import send_email
 
+
 # Load environment variables from config/.env file
 load_dotenv("config/.env")
 
