@@ -51,6 +51,8 @@ Send a test email:
 python main.py
 ```
 
+For detailed Gmail, Notion, calendar, and automation setup, see [SETUP.md](SETUP.md).
+
 ## useful commands
 
 ```bash
